@@ -293,8 +293,11 @@ end
 
 function list_tarball_files(tarball_path::AbstractString)
     names = String[]
-    Tar.list(`$(Pkg.PlatformEngines.exe7z()) x $tarball_path -so`) do hdr
-        push!(names, hdr.path)
+    # Tar.list(`$(Pkg.PlatformEngines.exe7z()) x $tarball_path -so`) do hdr
+    GZip.open(tarball_path) do tar
+        Tar.list(tar) do hdr
+            push!(names, hdr.path)
+        end
     end
     return names
 end

@@ -3,7 +3,7 @@ module Registry
 import ..Pkg
 using ..Pkg: depots1, printpkgstyle, stderr_f, isdir_nothrow, pathrepr, pkg_server,
              GitTools, get_bool_env
-using ..Pkg.PlatformEngines: download_verify_unpack, download, download_verify, exe7z
+using ..Pkg.PlatformEngines: download_verify_unpack, download, download_verify
 using UUIDs, LibGit2, TOML
 import FileWatching
 

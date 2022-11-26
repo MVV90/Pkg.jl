@@ -789,8 +789,15 @@ function _run_precompilation_script_setup()
         repo = "$(escape_string(tmp))/TestPkg.jl"
         """)
     Tar.create("registries/Registry", "registries/Registry.tar")
-    cmd = `$(Pkg.PlatformEngines.exe7z()) a "registries/Registry.tar.gz" -tgzip "registries/Registry.tar"`
-    run(pipeline(cmd, stdout = stdout_f(), stderr = stderr_f()))
+    # cmd = `$(Pkg.PlatformEngines.exe7z()) a "registries/Registry.tar.gz" -tgzip "registries/Registry.tar"`
+    # run(pipeline(cmd, stdout = stdout_f(), stderr = stderr_f()))
+    GZip.open("registries/Registry.tar.gz", "w") do fout
+        # Tar.open("registries/Registry.tar") do fin
+        open("registries/Registry.tar") do fin
+            fout.write(fin.read())
+        end
+    end
+
     write("registries/Registry.toml", """
           git-tree-sha1 = "11b5fad51c4f98cfe0c145ceab0b8fb63fed6f81"
           uuid = "37c07fec-e54c-4851-934c-2e3885e4053e"

@@ -543,8 +543,6 @@ function install_archive(
             unpacked = dir
         else
             dirs = readdir(dir)
-            # 7z on Win might create this spurious file
-            filter!(x -> x != "pax_global_header", dirs)
             @assert length(dirs) == 1
             unpacked = joinpath(dir, dirs[1])
         end

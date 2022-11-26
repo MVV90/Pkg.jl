@@ -4,41 +4,12 @@
 
 module PlatformEngines
 
-using SHA, Downloads, Tar
+using SHA, Downloads, Tar, GZip
 import ...Pkg: Pkg, TOML, pkg_server, depots1, can_fancyprint, stderr_f
 using ..MiniProgressBars
-using Base.BinaryPlatforms, p7zip_jll
+using Base.BinaryPlatforms
 
 export verify, unpack, package, download_verify_unpack
-
-const EXE7Z_LOCK = ReentrantLock()
-const EXE7Z = Ref{String}()
-
-function exe7z()
-    # If the JLL is available, use the wrapper function defined in there
-    if p7zip_jll.is_available()
-        return p7zip_jll.p7zip()
-    end
-
-    lock(EXE7Z_LOCK) do
-        if !isassigned(EXE7Z)
-            EXE7Z[] = find7z()
-        end
-        return Cmd([EXE7Z[]])
-    end
-end
-
-function find7z()
-    name = "7z"
-    Sys.iswindows() && (name = "$name.exe")
-    for dir in (joinpath("..", "libexec"), ".")
-        path = normpath(Sys.BINDIR::String, dir, name)
-        isfile(path) && return path
-    end
-    path = Sys.which(name)
-    path !== nothing && return path
-    error("7z binary not found")
-end
 
 is_secure_url(url::AbstractString) =
     occursin(r"^(https://|\w+://(127\.0\.0\.1|localhost)(:\d+)?($|/))"i, url)
@@ -389,7 +360,10 @@ function unpack(
     dest::AbstractString;
     verbose::Bool = false,
 )
-    Tar.extract(`$(exe7z()) x $tarball_path -so`, dest, copy_symlinks = copy_symlinks())
+    GZip.open(tarball_path) do io
+        # cmd = `$(exe7z()) x $tarball_path -so`
+        Tar.extract(io, dest, copy_symlinks = copy_symlinks())
+    end
 end
 
 """
@@ -399,8 +373,9 @@ Compress `src_dir` into a tarball located at `tarball_path`.
 """
 function package(src_dir::AbstractString, tarball_path::AbstractString; io=stderr_f())
     rm(tarball_path, force=true)
-    cmd = `$(exe7z()) a -si -tgzip -mx9 $tarball_path`
-    open(pipeline(cmd, stdout=devnull, stderr=io), write=true) do io
+    # cmd = `$(exe7z()) a -si -tgzip -mx9 $tarball_path`
+    # open(pipeline(cmd, stdout=devnull, stderr=io), write=true) do io
+    GZip.open(tarball_path, "w") do io
         Tar.create(src_dir, io)
     end
 end
@@ -518,8 +493,10 @@ function download_verify_unpack(
         if verbose
             @info("Unpacking $(tarball_path) into $(dest)...")
         end
-        open(`$(exe7z()) x $tarball_path -so`) do io
-            Tar.extract(io, dest, copy_symlinks = copy_symlinks())
+
+        GZip.open(tar_gz) do tar
+        # open(`$(exe7z()) x $tarball_path -so`) do io
+            Tar.extract(tar, dest, copy_symlinks = copy_symlinks())
         end
     finally
         if remove_tarball
