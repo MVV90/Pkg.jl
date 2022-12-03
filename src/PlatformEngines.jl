@@ -361,7 +361,6 @@ function unpack(
     verbose::Bool = false,
 )
     GZip.open(tarball_path) do io
-        # cmd = `$(exe7z()) x $tarball_path -so`
         Tar.extract(io, dest, copy_symlinks = copy_symlinks())
     end
 end
