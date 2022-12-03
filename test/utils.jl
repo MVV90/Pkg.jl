@@ -5,6 +5,7 @@ module Utils
 import ..Pkg
 import Pkg: stdout_f, stderr_f
 using Tar
+using GZip
 using TOML
 using UUIDs
 
