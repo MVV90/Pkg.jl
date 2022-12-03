@@ -743,6 +743,7 @@ end
 
 using LibGit2: LibGit2
 using Tar: Tar
+using GZip
 function _run_precompilation_script_setup()
     tmp = mktempdir()
     cd(tmp)
