@@ -1,6 +1,7 @@
 using Base: UUID, SHA1
 using TOML
 using Tar
+using GZip
 using ..Versions: VersionSpec, VersionRange
 using ..LazilyInitializedFields
 
@@ -186,7 +187,6 @@ function init_package_info!(pkg::PkgEntry)
     return pkg.info
 end
 
-
 function uncompress_registry(tar_gz::AbstractString)
     if !isfile(tar_gz)
         error("$(repr(tar_gz)): No such file")
@@ -194,7 +194,7 @@ function uncompress_registry(tar_gz::AbstractString)
     data = Dict{String, String}()
     buf = Vector{UInt8}(undef, Tar.DEFAULT_BUFFER_SIZE)
     io = IOBuffer()
-    open(`$(exe7z()) x $tar_gz -so`) do tar
+    GZip.open(tar_gz) do tar
         Tar.read_tarball(x->true, tar; buf=buf) do hdr, _
             if hdr.type == :file
                 Tar.read_data(tar, io; size=hdr.size, buf=buf)

@@ -2976,12 +2976,12 @@ end
     isolate(loaded_depot=true) do
         # Next, test that stdlibs do not get dependencies from the registry
         # NOTE: this test depends on the fact that in Julia v1.6+ we added
-        # "fake" JLLs that do not depend on Pkg while the "normal" p7zip_jll does.
-        # A future p7zip_jll in the registry may not depend on Pkg, so be sure
+        # "fake" JLLs that do not depend on Pkg while the "normal" SHA does.
+        # A future SHA in the registry may not depend on Pkg, so be sure
         # to verify your assumptions when updating this test.
-        Pkg.add("p7zip_jll")
-        p7zip_jll_uuid = UUID("3f19e933-33d8-53b3-aaab-bd5110c3b7a0")
-        @test !("Pkg" in keys(Pkg.dependencies()[p7zip_jll_uuid].dependencies))
+        Pkg.add("SHA")
+        SHA_uuid = UUID("ea8e919c-243c-51af-8825-aaa63cd721ce")
+        @test !("Pkg" in keys(Pkg.dependencies()[SHA_uuid].dependencies))
     end
 
     empty!(Pkg.Types.STDLIBS_BY_VERSION)
