@@ -372,9 +372,14 @@ Compress `src_dir` into a tarball located at `tarball_path`.
 """
 function package(src_dir::AbstractString, tarball_path::AbstractString; io=stderr_f())
     rm(tarball_path, force=true)
-    # cmd = `$(exe7z()) a -si -tgzip -mx9 $tarball_path`
-    # open(pipeline(cmd, stdout=devnull, stderr=io), write=true) do io
-    GZip.open(tarball_path, "w") do io
+    output = tarball_path
+    if !occursin(".tar", output[end-4:end])
+        output = output * ".tar"
+    end
+    if !occursin(".gz", output[end-4:end])
+        output = output * ".gz"
+    end
+    GZip.open(output, "w") do io
         Tar.create(src_dir, io)
     end
 end
