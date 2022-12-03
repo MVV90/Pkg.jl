@@ -498,8 +498,7 @@ function download_verify_unpack(
             @info("Unpacking $(tarball_path) into $(dest)...")
         end
 
-        GZip.open(tar_gz) do tar
-        # open(`$(exe7z()) x $tarball_path -so`) do io
+        GZip.open(tarball_path) do tar
             Tar.extract(tar, dest, copy_symlinks = copy_symlinks())
         end
     finally
